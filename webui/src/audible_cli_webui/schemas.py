@@ -20,6 +20,12 @@ class AudibleAccountInfo(BaseModel):
     connected_at: datetime | None = None
 
 
+class DisconnectResult(BaseModel):
+    # False when Amazon couldn't be told (e.g. the token was already revoked);
+    # the stored login is removed regardless.
+    amazon_device_removed: bool
+
+
 class StartConnectRequest(BaseModel):
     marketplace: str
     with_username: bool = False

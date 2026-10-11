@@ -1,3 +1,6 @@
+import asyncio
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -5,6 +8,9 @@ from .. import models, schemas
 from ..audible_bridge import auth_store, login_flow
 from ..auth.session import SessionData
 from ..deps import get_current_session, get_current_user, get_db
+from ..importer.jobs import job_manager
+
+logger = logging.getLogger("audible_cli_webui.api.audible")
 
 router = APIRouter(prefix="/api/audible")
 
@@ -57,9 +63,27 @@ async def connect_complete(
     return {"ok": True}
 
 
-@router.delete("/account", status_code=204)
+@router.delete("/account", response_model=schemas.DisconnectResult)
 async def disconnect_account(
     user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> None:
+) -> schemas.DisconnectResult:
+    if job_manager.is_user_busy(user.id):
+        raise HTTPException(status_code=409, detail="Wait for the running import to finish before disconnecting.")
+
+    account = auth_store.get_account(db, user.id)
+    if account is None:
+        return schemas.DisconnectResult(amazon_device_removed=False)
+
+    # Best-effort: the stored login is deleted either way, so an expired or
+    # already-revoked token can't leave someone unable to disconnect.
+    try:
+        authenticator = auth_store.load_authenticator(account)
+        await asyncio.to_thread(authenticator.deregister_device)
+        device_removed = True
+    except Exception:
+        logger.warning("Could not deregister Audible device for user %s", user.id, exc_info=True)
+        device_removed = False
+
     auth_store.delete_account(db, user.id)
+    return schemas.DisconnectResult(amazon_device_removed=device_removed)
