@@ -2,6 +2,7 @@ import type {
   AbsLibrary,
   AbsSettingsInfo,
   AudibleAccountInfo,
+  DisconnectResult,
   ImportReadiness,
   ImportRunDetail,
   ImportRunSummary,
@@ -74,7 +75,7 @@ export const api = {
     post<LoginUrlResponse>('/api/audible/connect/start', { marketplace, with_username: withUsername }),
   completeAudibleConnect: (pastedUrl: string) =>
     post<{ ok: boolean }>('/api/audible/connect/complete', { pasted_url: pastedUrl }),
-  disconnectAudible: () => del<void>('/api/audible/account'),
+  disconnectAudible: () => del<DisconnectResult>('/api/audible/account'),
 
   importReadiness: () => get<ImportReadiness>('/api/imports/readiness'),
   triggerImport: () => post<{ run_id: number }>('/api/imports'),

@@ -15,6 +15,10 @@ export interface AudibleAccountInfo {
   connected_at: string | null
 }
 
+export interface DisconnectResult {
+  amazon_device_removed: boolean
+}
+
 export interface LoginUrlResponse {
   login_url: string
 }
