@@ -68,7 +68,7 @@ const del = <T>(path: string) => request<T>(path, { method: 'DELETE' })
 
 export const api = {
   me: () => get<Me>('/api/me'),
-  logout: () => post<void>('/auth/logout'),
+  logout: () => post<{ redirect: string }>('/auth/logout'),
 
   audibleAccount: () => get<AudibleAccountInfo>('/api/audible/account'),
   startAudibleConnect: (marketplace: string, withUsername: boolean) =>

@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy import select
 
 from .. import models
@@ -63,6 +63,10 @@ async def callback(request: Request):
 
 @router.post("/auth/logout")
 async def logout(request: Request):
-    response = RedirectResponse(url="/", status_code=303)
+    # JSON rather than a redirect: the frontend calls this with fetch, which
+    # would silently follow a redirect and hand back the SPA's HTML. Landing
+    # on "/" would also bounce straight through /auth/login and, with the SSO
+    # session still alive, sign the user right back in — hence /signed-out.
+    response = JSONResponse({"redirect": settings.oidc_logout_url or "/signed-out"})
     clear_session(request, response)
     return response

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Route, Routes } from 'react-router-dom'
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { api } from './api/client'
 import type { Me } from './api/types'
 import { AdminSettingsPage } from './routes/AdminSettingsPage'
@@ -7,18 +7,28 @@ import { ConnectAudiblePage } from './routes/ConnectAudiblePage'
 import { DashboardPage } from './routes/DashboardPage'
 import { RunDetailPage } from './routes/RunDetailPage'
 import { RunHistoryPage } from './routes/RunHistoryPage'
+import { SignedOutPage } from './routes/SignedOutPage'
 
 export function App() {
   const [me, setMe] = useState<Me | null>(null)
+  const signedOut = useLocation().pathname === '/signed-out'
 
   useEffect(() => {
-    api.me().then(setMe)
-  }, [])
+    // On /signed-out a 401 from /api/me would redirect to the login flow.
+    if (!signedOut) api.me().then(setMe)
+  }, [signedOut])
 
   const handleLogout = async () => {
-    await api.logout()
-    window.location.href = '/'
+    let redirect = '/signed-out'
+    try {
+      redirect = (await api.logout()).redirect
+    } catch {
+      // Already logged out (401) or the server is unreachable: still leave.
+    }
+    window.location.href = redirect
   }
+
+  if (signedOut) return <SignedOutPage />
 
   return (
     <div className="app">
