@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     oidc_client_secret: str
     oidc_admin_group: str
     public_base_url: str
+    # Optional: where "Log out" sends the browser after clearing this app's
+    # session, to end the SSO session too. Authelia has no OIDC
+    # end_session_endpoint, but its portal's /logout?rd=... does this, e.g.
+    # https://auth.example.com/logout?rd=https://this-app.example.com/signed-out
+    # Unset, logging out only ends this app's session.
+    oidc_logout_url: str | None = None
 
     database_url: str = "sqlite:///data/webui.db"
     work_dir: str = "data/work"

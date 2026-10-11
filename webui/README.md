@@ -33,6 +33,7 @@ deployment.
 | `OIDC_ISSUER` | Base URL of your Authelia instance (e.g. `https://auth.example.com`). |
 | `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | From the Authelia client registration above. |
 | `OIDC_ADMIN_GROUP` | LDAP/Authelia group name whose members get admin rights in this app (e.g. `audiobook-admins`). |
+| `OIDC_LOGOUT_URL` | Optional. Where "Log out" sends the browser after ending this app's session, to sign out of Authelia too — e.g. `https://auth.example.com/logout?rd=https://<this-app-host>/signed-out`. Unset, "Log out" only signs out of this app; the next login goes straight through on the existing Authelia session. |
 | `PUBLIC_BASE_URL` | The externally-reachable base URL of this app (used to build the OIDC redirect URI). |
 | `DATABASE_URL` | SQLAlchemy URL, defaults to a SQLite file under `WORK_DIR`. |
 | `WORK_DIR` | Scratch directory for in-progress downloads/transcodes. |
